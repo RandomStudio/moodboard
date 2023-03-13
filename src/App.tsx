@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
+interface CustomHTMLVideoElement extends HTMLVideoElement {
+  activeFrame: number;
+}
+
 function App() {
-const videoRef = useRef<HTMLVideoElement>(null);
+const videoRef = useRef<CustomHTMLVideoElement>(null);
 
 const stopSignalRef = useRef(false);
 const [activeFrame, setActiveFrame] = useState<number>(0);
 const [savedFrames, setSavedFrames] = useState<number[]>([]);
 const handleFrame = () => {
-  if (stopSignalRef.current) {
+  if (!videoRef.current || stopSignalRef.current) {
     stopSignalRef.current = false;
     return;
   }
@@ -20,6 +24,9 @@ const handleFrame = () => {
 }
 
 const handleStart = () => {
+  if (!videoRef.current) {
+    return;
+  }
   videoRef.current.activeFrame = videoRef.current.activeFrame ?? 0;
   stopSignalRef.current = false;
   handleFrame()
@@ -29,6 +36,7 @@ const handleStop = () => {
   stopSignalRef.current = true
   setSavedFrames([...savedFrames, activeFrame]);
 }
+
 useEffect(() => {
   if (savedFrames.length === 0) {
     return;
