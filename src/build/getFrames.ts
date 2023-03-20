@@ -1,5 +1,8 @@
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { writeFileSync } from 'fs';
+// @ts-ignore
+import probe from 'probe-image-size';
+
 
 const client = new S3Client({
   region: "eu-west-3",
@@ -9,13 +12,21 @@ const client = new S3Client({
   }
 });
 
+const getImg = async (url: string) => {
+  const img = new Image();
+  img.decoding = 'async';
+  img.src = url;
+  await img.decode()
+  return img;
+};
+
+
 const saveFramesList = async () => {
   console.log('start')
   const command = new ListObjectsV2Command({
     Bucket: "random-moodboard",
     MaxKeys: 10000,
   });
-
 
   try {
     let isPartial = true;
@@ -40,8 +51,13 @@ const saveFramesList = async () => {
         - parseInt(b.replace('output/frame', '').replace('.png', ''))
       );
 
+    // We can do something later with this data
     let data = JSON.stringify(orderedResults);
-    writeFileSync('./src/frames.json', data);
+
+    let result = await probe(`https://random-moodboard.s3.eu-west-3.amazonaws.com/${orderedResults[0]}`);
+    let dimensions = JSON.stringify(result);
+    console.log(dimensions)
+    writeFileSync('./public/dimensions.json', dimensions);
   } catch (err) {
     console.error(err);
   }
