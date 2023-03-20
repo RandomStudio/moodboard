@@ -45,7 +45,7 @@ const saveFrame = (frame: number) => {
   const a = document.createElement('a');
   a.style.display = 'none';
   const filename = `frame${frame}.png`;
-  a.href = `/output/${filename}`;
+  a.href = `https://random-moodboard.s3.eu-west-3.amazonaws.com/output/${filename}`;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
