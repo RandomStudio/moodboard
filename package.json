@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "npm run setup && vite",
+    "build": "npm run setup && tsc && vite build",
+    "setup": "ts-node --esm src/build/getFrames.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,10 +14,15 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.27",
+    "@aws-sdk/client-s3": "^3.294.0",
+    "@types/react": "18.0.27",
     "@types/react-dom": "^18.0.10",
     "@vitejs/plugin-react-swc": "^3.0.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.9.3",
     "vite": "^4.1.0"
+  },
+  "resolutions": {
+    "@types/react": "18.0.27"
   }
 }

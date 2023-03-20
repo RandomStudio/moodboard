@@ -5,20 +5,29 @@ interface CustomHTMLVideoElement extends HTMLVideoElement {
   activeFrame: number;
 }
 
+const supportsVideoCallback = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+
+let seenFrames = localStorage.getItem('seenFrames') ? JSON.parse(localStorage.getItem('seenFrames')!) : [];
+
 function App() {
 const videoRef = useRef<CustomHTMLVideoElement>(null);
 
 const stopSignalRef = useRef(false);
 const [activeFrame, setActiveFrame] = useState<number>(0);
-const [savedFrames, setSavedFrames] = useState<number[]>([]);
 const handleFrame = () => {
   if (!videoRef.current || stopSignalRef.current) {
-    stopSignalRef.current = false;
+    window.setTimeout(() => {
+      stopSignalRef.current = false;
+    }, 50)
     return;
   }
   videoRef.current?.requestVideoFrameCallback(handleFrame)
   const nextFrame = videoRef.current.activeFrame + 1;
   videoRef.current.activeFrame = nextFrame;
+  if (seenFrames.includes(nextFrame)) {
+    handleFrame();
+    return;
+  }
   videoRef.current.currentTime = nextFrame / 60;
   setActiveFrame(nextFrame);
 }
@@ -32,28 +41,32 @@ const handleStart = () => {
   handleFrame()
 }
 
-const handleStop = () => {
-  stopSignalRef.current = true
-  setSavedFrames([...savedFrames, activeFrame]);
-}
-
-useEffect(() => {
-  if (savedFrames.length === 0) {
-    return;
-  }
+const saveFrame = (frame: number) => {
   const a = document.createElement('a');
   a.style.display = 'none';
-  const filename = `frame${savedFrames.at(-1)}.png`;
+  const filename = `frame${frame}.png`;
   a.href = `/output/${filename}`;
-  console.log(a.href)
   a.download = filename;
   document.body.appendChild(a);
   a.click();
-}, [savedFrames]);
+}
+
+const hideFrame = (frame: number) => {
+  seenFrames = [...seenFrames, frame];
+  localStorage.setItem('seenFrames', JSON.stringify(seenFrames));
+}
+
+const handleStop = () => {
+  stopSignalRef.current = true;
+  saveFrame(activeFrame);
+  hideFrame(activeFrame);
+}
 
   return (
     <div className="App">
-      <video src="/output/out.mp4" ref={videoRef} onMouseDown={handleStart} onMouseUp={handleStop} />
+      {supportsVideoCallback ? (
+        <video src="https://random-moodboard.s3.eu-west-3.amazonaws.com/output/preview.mp4" ref={videoRef} onMouseLeave={handleStop} onMouseDown={handleStart} onMouseUp={handleStop} />
+      ): <p><a href="https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback" target="_blank">Video callback not supported in Firefox. You hate to see it.</a></p>}
     </div>
   )
 }
