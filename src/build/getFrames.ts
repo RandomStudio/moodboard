@@ -2,7 +2,8 @@ import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { writeFileSync } from 'fs';
 // @ts-ignore
 import probe from 'probe-image-size';
-import { ASSET_URL } from "../App";
+
+export const ASSET_URL = 'https://random-moodboard.s3.eu-west-3.amazonaws.com';
 
 const client = new S3Client({
   region: "eu-west-3",
