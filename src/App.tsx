@@ -31,7 +31,6 @@ function App() {
       handleFrame();
       return;
     }
-    console.log(videoRef.current.currentTime, nextFrame)
     videoRef.current.currentTime = nextFrame / 29.97;
     setActiveFrame(nextFrame);
   }
@@ -61,7 +60,6 @@ const saveFrame = async (frame: number) => {
   img.width = dimensions.width;
   img.height = dimensions.height;
   img.crossOrigin = 'anonymous';
-  console.log(frame)
   img.src = `${ASSET_URL}/frame${frame}.png`;
   img.decoding = 'async';
   await img.decode();
