@@ -2,7 +2,7 @@ import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { writeFileSync } from 'fs';
 // @ts-ignore
 import probe from 'probe-image-size';
-
+import { ASSET_URL } from "../App";
 
 const client = new S3Client({
   region: "eu-west-3",
@@ -20,43 +20,27 @@ const getImg = async (url: string) => {
   return img;
 };
 
-
 const saveFramesList = async () => {
   console.log('start')
   const command = new ListObjectsV2Command({
     Bucket: "random-moodboard",
-    MaxKeys: 10000,
+    MaxKeys: 500,
   });
 
   try {
-    let isPartial = true;
+    let image;
+    while (!image) {
+      let contents: string[] = [];
 
-    console.log("Your bucket contains the following objects:\n")
-    let contents: string[] = [];
-
-    while (isPartial) {
       const { Contents, IsTruncated, NextContinuationToken } = await client.send(command);
-      if (!Contents) {
-        break;
+      const images = Contents?.filter((item) => item.Key?.includes('.jpg') || item.Key?.includes('.png')) ?? [];
+      if (images[0]) {
+        image = images[0].Key as string;
       }
-      const contentsList = Contents.map((c) => c.Key as string);
-      contents = [...contents, ...contentsList];
-      isPartial = !!IsTruncated;
-      command.input.ContinuationToken = NextContinuationToken;
     }
-    const orderedResults = contents
-      .filter((item: string) => item.includes('.png'))
-      .sort((a: string, b: string) =>
-        parseInt(a.replace('output/frame', '').replace('.png', ''))
-        - parseInt(b.replace('output/frame', '').replace('.png', ''))
-      );
 
-    // We can do something later with this data
-    let data = JSON.stringify(orderedResults);
-
-    let result = await probe(`https://random-moodboard.s3.eu-west-3.amazonaws.com/${orderedResults[0]}`);
+    let result = await probe(`${ASSET_URL}/${image}`);
     let dimensions = JSON.stringify(result);
-    console.log(dimensions)
     writeFileSync('./public/dimensions.json', dimensions);
   } catch (err) {
     console.error(err);

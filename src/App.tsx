@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
+export const ASSET_URL = 'https://random-moodboard.s3.eu-west-3.amazonaws.com';
+
 interface CustomHTMLVideoElement extends HTMLVideoElement {
   activeFrame: number;
 }
@@ -29,7 +31,8 @@ function App() {
       handleFrame();
       return;
     }
-    videoRef.current.currentTime = nextFrame / 60;
+    console.log(videoRef.current.currentTime, nextFrame)
+    videoRef.current.currentTime = nextFrame / 29.97;
     setActiveFrame(nextFrame);
   }
 
@@ -58,7 +61,8 @@ const saveFrame = async (frame: number) => {
   img.width = dimensions.width;
   img.height = dimensions.height;
   img.crossOrigin = 'anonymous';
-  img.src = `https://random-moodboard.s3.eu-west-3.amazonaws.com/output/frame${frame}.png`;
+  console.log(frame)
+  img.src = `${ASSET_URL}/frame${frame}.png`;
   img.decoding = 'async';
   await img.decode();
 
@@ -75,7 +79,6 @@ const saveFrame = async (frame: number) => {
   const filename = `frame${frame}.png`;
   a.href = dataURL;
   a.download = filename;
-  document.body.appendChild(a);
   a.click();
   hideFrame(frame);
 }
@@ -97,7 +100,7 @@ useEffect(() => {
   return (
     <div className="App">
       {supportsVideoCallback ? (
-        <video crossOrigin='anonymous' src="https://random-moodboard.s3.eu-west-3.amazonaws.com/output/preview.mp4" ref={videoRef} onMouseLeave={handleStop} onMouseDown={handleStart} onMouseUp={handleStop} />
+        <video crossOrigin='anonymous' src={`${ASSET_URL}/preview.mp4`} ref={videoRef} onMouseLeave={handleStop} onMouseDown={handleStart} onMouseUp={handleStop} />
       ): <p><a href="https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback" target="_blank">Video callback not supported in Firefox. You hate to see it.</a></p>}
     </div>
   )
