@@ -16,7 +16,7 @@ function App() {
 
   const stopSignalRef = useRef(false);
   const [activeFrame, setActiveFrame] = useState<number>(0);
-  const [dimensions, setDimensions] = useState<{width: number, height: number}>({width: 0, height: 0});
+  const [frames, setFrames] = useState<string[]>([]);
   const handleFrame = () => {
     if (!videoRef.current || stopSignalRef.current) {
       window.setTimeout(() => {
@@ -49,36 +49,34 @@ function App() {
     localStorage.setItem('seenFrames', JSON.stringify(seenFrames));
   }
 
-const saveFrame = async (frame: number) => {
-  if (!videoRef.current || seenFrames.includes(frame)) {
+const saveFrame = async (frameIndex: number) => {
+  if (!videoRef.current || seenFrames.includes(frameIndex)) {
     return;
   }
   const a = document.createElement('a');
   a.style.display = 'none';
 
   const img = new Image()
-  img.width = dimensions.width;
-  img.height = dimensions.height;
   img.crossOrigin = 'anonymous';
-  img.src = `${ASSET_URL}/frame${frame}.png`;
+  img.src = `${ASSET_URL}/${frames[frameIndex]}`;
   img.decoding = 'async';
   await img.decode();
 
   const canvas = document.createElement('canvas');
-  canvas.width = dimensions.width;
-  canvas.height = dimensions.height;
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     return;
   }
-  ctx.drawImage(img, 0, 0, dimensions.width, dimensions.height);
+  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
   const dataURL = canvas.toDataURL('image/png');
 
-  const filename = `frame${frame}.png`;
+  const filename = frames[frameIndex];
   a.href = dataURL;
   a.download = filename;
   a.click();
-  hideFrame(frame);
+  hideFrame(frameIndex);
 }
 
 const handleStop = () => {
@@ -87,11 +85,9 @@ const handleStop = () => {
 }
 
 useEffect(() => {
-  fetch('/dimensions.json').then((res) => res.json()).then((dimensions) => {
-    if (!videoRef.current) {
-      return;
-    }
-    setDimensions(dimensions)
+  fetch(`${ASSET_URL}/files.log`).then((res) => res.text()).then((data) => {
+    const lines = data.replaceAll('file ', '').replaceAll("'", '').split('\n');
+    setFrames(lines)
   });
 }, []);
 

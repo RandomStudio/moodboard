@@ -4,9 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run setup && vite",
-    "build": "npm run setup && tsc && vite build",
-    "setup": "ts-node --esm src/build/getFrames.ts",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
