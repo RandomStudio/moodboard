@@ -91,10 +91,13 @@ useEffect(() => {
   });
 }, []);
 
+const date = new Date();
+const dateAsString = `${date.getFullYear()}${date.getMonth()}${date.getDate()}`;
+
   return (
     <div className="App">
       {supportsVideoCallback ? (
-        <video crossOrigin='anonymous' src={`${ASSET_URL}/preview.mp4`} ref={videoRef} onMouseLeave={handleStop} onMouseDown={handleStart} onMouseUp={handleStop} />
+        <video crossOrigin='anonymous' src={`${ASSET_URL}/preview.mp4?${dateAsString}`} ref={videoRef} onMouseLeave={handleStop} onMouseDown={handleStart} onMouseUp={handleStop} />
       ): <p><a href="https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback" target="_blank">Video callback not supported in Firefox. You hate to see it.</a></p>}
     </div>
   )
