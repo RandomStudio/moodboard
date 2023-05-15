@@ -7,9 +7,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Random Studio TV Moodboard</title>
   <style>
+    @font-face {
+      font-family: "Random Regular";
+      src: url("Random-Regular.woff2") format("woff2");
+    }
+
     body {
       margin: 0;
       padding: 0;
+      font-family: "Random Regular", sans-serif;
+      font-size: 16px;
+      font-weight: 100;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+      color: #f8f8f8;
+      -webkit-font-smoothing: antialiased;
       overflow: hidden;
     }
 
@@ -22,11 +34,38 @@
       object-fit: cover;
       pointer-events: none;
     }
+
+    .overlay {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .overlay img {
+      height: 60px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
 <body>
   <video src="https://random-moodboard.s3.eu-west-3.amazonaws.com/tv.mp4" autoplay muted loop></video>
+  <div class="overlay">
+    <img src="airplay.svg" />
+    <span id="device-name"></span>
+  </div>
+  <script type="text/javascript">
+    (() => {
+      const url = new URL(window.location.href);
+      const room = url.searchParams.get("room");
+      document.getElementById("device-name").innerHTML = `[LG] ${room.toUpperCase()} Meeting Room`;
+    })();
+  </script>
 </body>
 
 </html>
